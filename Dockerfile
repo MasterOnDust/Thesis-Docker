@@ -82,20 +82,23 @@ RUN ["/bin/bash" , "-c", ". /opt/conda/etc/profile.d/conda.sh && \
     jupyter labextension install @jupyterlab/toc && \
     conda deactivate && \
     conda init bash"]
-
-RUN jupyter kernelspec install /opt/conda/envs/dust/share/jupyter/kernels/xpython
-
+RUN chown notebook:notebook $CONDA_DIR "$CONDA_DIR/.condatmp"
+COPY --chown=notebook:notebook .jupyter/ $HOME/.jupyter/
+# Ensure that the default config files are available.
+COPY --chown=notebook:notebook .jupyter/ /etc/default/jupyter
+RUN chmod go+w -R "$HOME"
+RUN fix-permissions $CONDA_DIR
 ENV HOME=/home/notebook \
     XDG_CACHE_HOME=/home/notebook/.cache/
+
+
 
 USER notebook
 
 
 
 WORKDIR $HOME
-COPY --chown=notebook:notebook .jupyter/ $HOME/.jupyter/
-# Ensure that the default config files are available.
-COPY --chown=notebook:notebook .jupyter/ /etc/default/jupyter
+
 
 ENV LANG=en_US.UTF-8
 
