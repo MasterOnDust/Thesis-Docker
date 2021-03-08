@@ -48,26 +48,18 @@ RUN conda config --set channel_priority strict && \
     'nbresuse' \
     'jupyter-server-proxy' \ 
     'git'  && \
-    pip install jupyterlab-spellchecker && \
-
-RUN jupyter serverextension enable --py jupyter_server_proxy jupyterlab_iframe && \
     jupyter labextension install \
-    '@jupyter-widgets/jupyterlab-manager' \
-    'plotlywidget@4.14.3' \
-    'jupyterlab-plotly@4.14.3' \
-    '@jupyterlab/github' \
-    'jupyter-matplotlib' \
     'nbdime-jupyterlab' \
     '@jupyterlab/toc' \
-    '@jupyterlab/server-proxy' \
-    'jupyterlab_iframe@0.2.3' && \
-    git clone https://github.com/paalka/nbresuse /tmp/nbresuse && pip install /tmp/nbresuse/ && \
+    '@jupyterlab/hub-extension'  && \
+    git clone https://github.com/paalka/nbresuse /tmp/nbresuse &&  \
+    pip install /tmp/nbresuse/ \
+    pip install jupyterlab-spellchecker && \
     jupyter serverextension enable --py nbresuse --sys-prefix && \
     jupyter nbextension install --py nbresuse --sys-prefix && \
     jupyter nbextension enable --py nbresuse --sys-prefix && \
+    jupyter labextension install jupyter-matplotlib && \
     jupyter lab build
-
-
 ENV APP_UID=999 \
 	APP_GID=999 
 RUN groupadd -g "$APP_GID" notebook && \
