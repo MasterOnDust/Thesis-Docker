@@ -2,7 +2,7 @@
 
 FROM jupyter/base-notebook:latest
 
-LABEL maintainer="Ove Haugvaldstad"
+LABEL maintainer="Ove Haugvaldstad ovehaugv@outlook.com"
 
 USER root
 
@@ -26,7 +26,7 @@ RUN apt update && apt-get install --no-install-recommends -y \
     unrar \
     vim && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
-
+# Remember to install nb_conda_kernels in order for kernels to show up
 
 RUN conda config --set channel_priority strict && \
     conda install --quiet --yes --update-all -c conda-forge \
