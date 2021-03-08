@@ -80,7 +80,6 @@ RUN ["/bin/bash" , "-c", ". /opt/conda/etc/profile.d/conda.sh && \
     jupyter labextension install @jupyterlab/toc && \
     conda deactivate && \
     conda init bash"]
-COPY --chown=root:root kernel.json /opt/conda/envs/dust/share/jupyter/kernels/xpython/kernel.json 
 
 RUN jupyter kernelspec install /opt/conda/envs/dust/share/jupyter/kernels/xpython
 
