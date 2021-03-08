@@ -66,6 +66,8 @@ RUN groupadd -g "$APP_GID" notebook && \
 	useradd -m -s /bin/bash -N -u "$APP_UID" -g notebook notebook && \
 	usermod -G users notebook
 
+COPY start-*.sh /usr/local/bin/
+
 
 ADD env.yml env.yml
 RUN conda env create -f env.yml && conda clean -yt &&\
