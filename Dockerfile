@@ -1,34 +1,16 @@
 # Basic MetOs container 
 
-FROM jupyter/minimal-notebook:latest
-
-LABEL maintainer="Ove Haugvaldstad ovehaugv@outlook.com"
-
+FROM jupyter/datascience-notebook:python-3.8.8 as miniconda
 USER root
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV DEBIAN_FRONTEND noninteractive \
+    NODE_OPTIONS --max-old-space-size=4096 \
+    NB_UID=999 \
+    NB_GID=999
 
-
-RUN apt update && apt-get install --no-install-recommends -y \
-    openssh-client\
-    nano\
-    htop\
-    less \
-    net-tools \
-    man-db \
-    iputils-ping\
-    tmux \
-    liblapack-dev\
-    libopenblas-dev\
-    graphviz \
-    cmake \
-    rsync \
-    p7zip-full\
-    unrar \
-    vim && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-# Remember to install nb_conda_kernels in order for kernels to show up
-
+RUN apt update && apt install -y eatmydata apt-utils 
 RUN conda config --set channel_priority strict && \
-    conda install --quiet --yes --update-all -c conda-forge \
+    eatmydata conda install --quiet --update-all --yes -c conda-forge \
     'xeus-python'\
     'nbconvert' \
     'fortran_kernel'\
@@ -45,48 +27,80 @@ RUN conda config --set channel_priority strict && \
     'nb_conda_kernels'\
     'jupyterlab-git'\
     'nbresuse' \
-    'jupyter-server-proxy' \ 
+    'jupyter-server-proxy' \
+    'plotly'\
+    'matplotlib' \ 
     'git'  && \
+    && conda clean  --all -f -y
+
+
+RUN jupyter serverextension enable --py jupyter_server_proxy jupyterlab_iframe && \
     jupyter labextension install \
+    '@jupyter-widgets/jupyterlab-manager' \
+    'plotlywidget@4.14.3' \
+    'jupyterlab-plotly@4.14.3' \
+    '@jupyterlab/github' \
+    'jupyter-matplotlib' \
     'nbdime-jupyterlab' \
     '@jupyterlab/toc' \
-    '@jupyterlab/hub-extension'  && \
-    git clone https://github.com/paalka/nbresuse /tmp/nbresuse &&  \
-    pip install /tmp/nbresuse/ \
-    pip install jupyterlab-spellchecker && \
+    '@jupyterlab/server-proxy' \
+    'jupyterlab_iframe@0.2.3' && \
+    git clone https://github.com/paalka/nbresuse /tmp/nbresuse && pip install /tmp/nbresuse/ && \
     jupyter serverextension enable --py nbresuse --sys-prefix && \
     jupyter nbextension install --py nbresuse --sys-prefix && \
     jupyter nbextension enable --py nbresuse --sys-prefix && \
-    jupyter labextension install jupyter-matplotlib && \
     jupyter lab build
+
+
+
+ENV TZ="Europe/Oslo" \
+	APP_UID=999 \
+	APP_GID=999 \
+	NB_UID=999 \
+	NB_GID=999 \
+    PKG_JUPYTER_NOTEBOOK_VERSION=6.2.x \
+	PKG_TOREE_VERSION=0.3.0-incubating \
+	PKG_R_VERSION=4.0.3 \
+	PKG_VS_CODE_VERSION=2.1692-vsc1.39.2  \
+	HOME=/home/notebook \
+    	PATH=$PATH:$SPARK_HOME/bin \
+    	XDG_CACHE_HOME=/home/notebook/.cache/
+
+RUN groupadd -g "$APP_GID" notebook && \
+	useradd -m -s /bin/bash -N -u "$APP_UID" -g notebook notebook && \
+	usermod -G users notebook
+
+COPY start-*.sh /usr/local/bin/
+COPY mem_parser.py /usr/local/bin/
+COPY --chown=notebook:notebook --from=miniconda $CONDA_DIR $CONDA_DIR
+COPY --chown=notebook:notebook --from=miniconda /usr/local/share/jupyter/kernels/minimal /usr/local/share/jupyter/kernels/minimal
+RUN mkdir -p "$CONDA_DIR/.condatmp" && chmod go+rwx "$CONDA_DIR/.condatmp"
+
+
+RUN wget -q "https://github.com/cdr/code-server/releases/download/$PKG_VS_CODE_VERSION/code-server$PKG_VS_CODE_VERSION-linux-x86_64.tar.gz"  && \
+    tar zxf "code-server$PKG_VS_CODE_VERSION-linux-x86_64.tar.gz" && \
+    mv "code-server$PKG_VS_CODE_VERSION-linux-x86_64/code-server" /usr/local/bin/ && \
+    rm -rf "code-server$PKG_VS_CODE_VERSION-linux-x86_64/*" "$HOME/.wget-hsts" && locale-gen en_US.UTF-8
 
 ADD env.yml env.yml
 RUN conda env create -f env.yml && conda clean -yt &&\
     jupyter labextension install jupyter-matplotlib
 
-RUN ["/bin/bash" , "-c", ". /opt/conda/etc/profile.d/conda.sh && \
-    conda activate dust && \
-    git clone https://github.com/Ovewh/DUST.git /home/jovyan/DUST && \
-    pip install -e /home/jovyan/DUST && \ 
-    jupyter labextension install jupyterlab-datawidgets && \
-    jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib && \
-    jupyter labextension install @jupyterlab/toc && \
-    conda deactivate && \
-    conda init bash"]
-USER jovyan
+
+RUN chown notebook:notebook $CONDA_DIR "$CONDA_DIR/.condatmp"
+COPY --chown=notebook:notebook .jupyter/ $HOME/.jupyter/
+
+COPY --chown=notebook:notebook .jupyter/ /etc/default/jupyter
+RUN chmod go+w -R "$HOME"
+
+
+RUN fix-permissions $CONDA_DIR
+
+USER notebook
+RUN conda init bash
+    
 WORKDIR $HOME
-ENV XDG_CACHE_HOME=/home/$NB_USER/.cache/
-# RUN mkdir "$HOME/.jupyter"
-COPY .jupyter/ /opt/.jupyter/ 
-COPY .jupyter/ /home/$NB_USER/.jupyter/
-COPY .jupyter/ /etc/default/jupyter
 
-RUN fix-permissions $HOME  &&\
-    fix-permissions /etc/default/jupyter
-
-
-
-
-ENV LANG=en_US.UTF-8
+RUN pip install jupyterlab_github && jupyter serverextension enable --sys-prefix jupyterlab_github
 
 CMD ["/usr/local/bin/start-notebook.sh"]
