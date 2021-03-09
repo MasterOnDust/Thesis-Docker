@@ -73,12 +73,14 @@ RUN ["/bin/bash" , "-c", ". /opt/conda/etc/profile.d/conda.sh && \
     jupyter labextension install @jupyterlab/toc && \
     conda deactivate && \
     conda init bash"]
-ENV XDG_CACHE_HOME=$HOME/.cache/
-COPY --chown=jovyan:jovyan .jupyter/ /opt/.jupyter/
+ENV XDG_CACHE_HOME=/home/$NB_USER/.cache/
+# RUN mkdir "$HOME/.jupyter"
+COPY .jupyter/ /opt/.jupyter/ 
+COPY .jupyter/ /home/$NB_USER 
+COPY .jupyter/ /etc/default/jupyter
 
-COPY --chown=jovyan:jovyan .jupyter/ $HOME/.jupyter/
-# Ensure that the default config files are available.
-COPY --chown=jovyan:jovyan .jupyter/ /etc/default/jupyter
+RUN fix-permissions $HOME  &&\
+    fix-permissions /etc/default/jupyter
 
 USER jovyan
 
