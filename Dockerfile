@@ -1,12 +1,11 @@
 # Basic MetOs container 
 
-FROM jupyter/base-notebook:latest
+FROM jupyter/minimal-notebook:latest
 
 LABEL maintainer="Ove Haugvaldstad ovehaugv@outlook.com"
 
 USER root
 
-# ENV HOME=/home/notebook 
 
 RUN apt update && apt-get install --no-install-recommends -y \
     openssh-client\
@@ -60,14 +59,6 @@ RUN conda config --set channel_priority strict && \
     jupyter nbextension enable --py nbresuse --sys-prefix && \
     jupyter labextension install jupyter-matplotlib && \
     jupyter lab build
-ENV APP_UID=999 \
-	APP_GID=999 
-RUN groupadd -g "$APP_GID" notebook && \
-	useradd -m -s /bin/bash -N -u "$APP_UID" -g notebook notebook && \
-	usermod -G users notebook
-
-COPY start-*.sh /usr/local/bin/
-
 
 ADD env.yml env.yml
 RUN conda env create -f env.yml && conda clean -yt &&\
@@ -75,27 +66,21 @@ RUN conda env create -f env.yml && conda clean -yt &&\
 
 RUN ["/bin/bash" , "-c", ". /opt/conda/etc/profile.d/conda.sh && \
     conda activate dust && \
-    git clone https://github.com/Ovewh/DUST.git /home/notebook/DUST && \
-    pip install -e /home/notebook/DUST && \ 
+    git clone https://github.com/Ovewh/DUST.git /home/jovyan/DUST && \
+    pip install -e /home/jovyan/DUST && \ 
     jupyter labextension install jupyterlab-datawidgets && \
     jupyter labextension install @jupyter-widgets/jupyterlab-manager jupyter-matplotlib && \
     jupyter labextension install @jupyterlab/toc && \
     conda deactivate && \
     conda init bash"]
-RUN chown notebook:notebook $CONDA_DIR "$CONDA_DIR/.condatmp"
-COPY --chown=notebook:notebook .jupyter/ $HOME/.jupyter/
+ENV XDG_CACHE_HOME=$HOME/.cache/
+COPY --chown=jovyan:jovyan .jupyter/ /opt/.jupyter/
+
+COPY --chown=jovyan:jovyan .jupyter/ $HOME/.jupyter/
 # Ensure that the default config files are available.
-COPY --chown=notebook:notebook .jupyter/ /etc/default/jupyter
-RUN chmod go+w -R "$HOME"
-RUN fix-permissions $CONDA_DIR
-ENV HOME=/home/notebook \
-    XDG_CACHE_HOME=/home/notebook/.cache/
+COPY --chown=jovyan:jovyan .jupyter/ /etc/default/jupyter
 
-
-
-USER notebook
-
-
+USER jovyan
 
 WORKDIR $HOME
 
