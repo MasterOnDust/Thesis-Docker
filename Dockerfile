@@ -31,7 +31,7 @@ RUN conda config --set channel_priority strict && \
     'plotly'\
     'matplotlib' \ 
     'git'  && \
-    && conda clean  --all -f -y
+     conda clean  --all -f -y
 
 
 RUN jupyter serverextension enable --py jupyter_server_proxy jupyterlab_iframe && \
