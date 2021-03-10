@@ -30,28 +30,29 @@ RUN conda config --set channel_priority strict && \
     'jupyter-server-proxy' \
     'plotly'\
     'matplotlib' \ 
+    'jupyterlab_iframe'\
     'git'  && \
      conda clean  --all -f -y
-
 
 RUN jupyter serverextension enable --py jupyter_server_proxy jupyterlab_iframe && \
     jupyter labextension install \
     '@jupyter-widgets/jupyterlab-manager' \
-    'plotlywidget@4.14.3' \
-    'jupyterlab-plotly@4.14.3' \
-    '@jupyterlab/github' \
+    'plotlywidget' \
+    'jupyterlab-plotly' \
     'jupyter-matplotlib' \
     'nbdime-jupyterlab' \
     '@jupyterlab/toc' \
     '@jupyterlab/server-proxy' \
-    'jupyterlab_iframe@0.2.3' && \
+    'jupyterlab_iframe' && \
     git clone https://github.com/paalka/nbresuse /tmp/nbresuse && pip install /tmp/nbresuse/ && \
     jupyter serverextension enable --py nbresuse --sys-prefix && \
     jupyter nbextension install --py nbresuse --sys-prefix && \
     jupyter nbextension enable --py nbresuse --sys-prefix && \
     jupyter lab build
 
+FROM jupyter/datascience-notebook:python-3.8.8 
 
+USER root
 
 ENV TZ="Europe/Oslo" \
 	APP_UID=999 \
@@ -73,7 +74,6 @@ RUN groupadd -g "$APP_GID" notebook && \
 COPY start-*.sh /usr/local/bin/
 COPY mem_parser.py /usr/local/bin/
 COPY --chown=notebook:notebook --from=miniconda $CONDA_DIR $CONDA_DIR
-COPY --chown=notebook:notebook --from=miniconda /usr/local/share/jupyter/kernels/minimal /usr/local/share/jupyter/kernels/minimal
 RUN mkdir -p "$CONDA_DIR/.condatmp" && chmod go+rwx "$CONDA_DIR/.condatmp"
 
 
@@ -89,7 +89,6 @@ RUN conda env create -f env.yml && conda clean -yt &&\
 
 RUN chown notebook:notebook $CONDA_DIR "$CONDA_DIR/.condatmp"
 COPY --chown=notebook:notebook .jupyter/ $HOME/.jupyter/
-
 COPY --chown=notebook:notebook .jupyter/ /etc/default/jupyter
 RUN chmod go+w -R "$HOME"
 
