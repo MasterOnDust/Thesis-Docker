@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND noninteractive \
 
 RUN apt update && apt install -y eatmydata apt-utils 
 RUN conda config --set channel_priority strict && \
-    eatmydata conda install --quiet --update-all --yes -c conda-forge \
+    conda install --quiet --update-all --yes -c conda-forge \
     'xeus-python'\
     'nbconvert' \
     'fortran_kernel'\
