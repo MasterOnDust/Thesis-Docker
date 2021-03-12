@@ -2,7 +2,6 @@
 
 FROM jupyter/datascience-notebook:python-3.8.8 as miniconda
 USER root
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND noninteractive \
     NODE_OPTIONS --max-old-space-size=4096 \
     NB_UID=999 \
@@ -10,10 +9,10 @@ ENV DEBIAN_FRONTEND noninteractive \
 
 RUN apt update && apt install -y eatmydata apt-utils 
 RUN conda config --set channel_priority strict && \
-    conda install --quiet --update-all --yes -c conda-forge \
-    'xeus-python'\
-    'nbconvert' \
-    'fortran_kernel'\
+    eatmydata conda install --quiet --update-all --yes -c conda-forge \
+    'xeus-python=0.11.3'\
+    'nbconvert=6.0.7' \
+    'fortran_kernel=0.1.7'\
     'tqdm' \
     'yapf' \
     'rise' \
@@ -21,18 +20,20 @@ RUN conda config --set channel_priority strict && \
     'jupyterlab==3.*' \
     'ipywidgets' \
     'nodejs'\
-    'dask-labextension' \
+    'dask-labextension=5.0.1' \
     'tornado' \
-    'python-graphviz' \
-    'nb_conda_kernels'\
-    'jupyterlab-git'\
-    'nbresuse' \
-    'jupyter-server-proxy' \
-    'plotly'\
-    'matplotlib' \ 
-    'jupyterlab_iframe'\
+    'python-graphviz=0.16' \
+    'nb_conda_kernels=2.3.1'\
+    'jupyter-server-proxy=1.6' \
+    'plotly=4.14.*'\
+    'matplotlib=3.3.*' \ 
+    'jupyterlab_iframe=0.3.0'\
+    'numpy' \
     'git'  && \
      conda clean  --all -f -y
+
+RUN conda create -n minimal -y && bash -c 'source activate minimal && conda install -y ipykernel && ipython kernel install --name=minimal --display-name="Python 3 (minimal conda)" && conda clean  --all -f -y && conda deactivate'
+
 
 RUN jupyter serverextension enable --py jupyter_server_proxy jupyterlab_iframe && \
     jupyter labextension install \
@@ -53,13 +54,44 @@ RUN jupyter serverextension enable --py jupyter_server_proxy jupyterlab_iframe &
 FROM jupyter/datascience-notebook:python-3.8.8 
 
 USER root
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        curl \
+        libfreetype6-dev \
+        libhdf5-serial-dev \
+        libzmq3-dev \
+        pkg-config \
+        software-properties-common \
+        unzip \
+	python3 \
+    	python3-dev \
+    	python3-venv \
+    	python3-pip \
+    	python3-wheel \
+    	python3-ipykernel \
+    	openssh-client \
+    	nano \
+    	htop \
+    	less \
+    	net-tools \
+    	man-db \
+    	iputils-ping \ 
+    	tmux \
+    	graphviz \
+    	vim &&\
+        apt-get install -y --only-upgrade openssl && \
+	apt-get clean && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*  
+
+
 
 ENV TZ="Europe/Oslo" \
 	APP_UID=999 \
 	APP_GID=999 \
 	NB_UID=999 \
 	NB_GID=999 \
-    PKG_JUPYTER_NOTEBOOK_VERSION=6.2.x \
+    PKG_JUPYTER_NOTEBOOK_VERSION=6.3.x \
 	PKG_TOREE_VERSION=0.3.0-incubating \
 	PKG_R_VERSION=4.0.3 \
 	PKG_VS_CODE_VERSION=2.1692-vsc1.39.2  \
@@ -74,6 +106,7 @@ RUN groupadd -g "$APP_GID" notebook && \
 COPY start-*.sh /usr/local/bin/
 COPY mem_parser.py /usr/local/bin/
 COPY --chown=notebook:notebook --from=miniconda $CONDA_DIR $CONDA_DIR
+COPY --chown=notebook:notebook --from=miniconda /usr/local/share/jupyter/kernels/minimal /usr/local/share/jupyter/kernels/minimal
 RUN mkdir -p "$CONDA_DIR/.condatmp" && chmod go+rwx "$CONDA_DIR/.condatmp"
 
 
@@ -95,11 +128,11 @@ RUN chmod go+w -R "$HOME"
 
 RUN fix-permissions $CONDA_DIR
 
+RUN chmod go+rwx /usr/local/bin/start-notebook.sh
+
 USER notebook
 RUN conda init bash
     
 WORKDIR $HOME
-
-RUN pip install jupyterlab_github && jupyter serverextension enable --sys-prefix jupyterlab_github
 
 CMD ["/usr/local/bin/start-notebook.sh"]

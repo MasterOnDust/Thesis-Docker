@@ -19,3 +19,4 @@ c.NotebookApp.allow_origin = '*'
 c.NotebookApp.allow_remote_access = True
 # Run all nodes interactively
 c.InteractiveShell.ast_node_interactivity = "all"
+c.ContentsManager.allow_hidden=True

@@ -1,13 +1,3 @@
-set -e
-
-# Exec the specified command or fall back on bash
-if [ $# -eq 0 ]; then
-    cmd=bash
-else
-    cmd=$*
-fi
-
-
 if [ -d "$PVC_MOUNT_PATH" ] && [ ! -L "$HOME/data" ]; then
 	ln -s "$PVC_MOUNT_PATH" "$HOME/data"
 fi
