@@ -116,8 +116,7 @@ RUN wget -q "https://github.com/cdr/code-server/releases/download/$PKG_VS_CODE_V
     rm -rf "code-server$PKG_VS_CODE_VERSION-linux-x86_64/*" "$HOME/.wget-hsts" && locale-gen en_US.UTF-8
 
 ADD env.yml env.yml
-RUN conda env create -f env.yml && conda clean -yt &&\
-    jupyter labextension install jupyter-matplotlib
+RUN conda env create -f env.yml && conda clean -yt
 
 
 RUN chown notebook:notebook $CONDA_DIR "$CONDA_DIR/.condatmp"
