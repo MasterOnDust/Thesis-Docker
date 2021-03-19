@@ -1,6 +1,6 @@
 # Basic MetOs container 
 
-FROM jupyter/datascience-notebook:python-3.8.8 as miniconda
+FROM jupyter/base-notebook:python-3.8.8 as miniconda
 USER root
 ENV DEBIAN_FRONTEND noninteractive \
     NODE_OPTIONS --max-old-space-size=4096 \
@@ -32,8 +32,6 @@ RUN conda config --set channel_priority strict && \
     'git'  && \
      conda clean  --all -f -y
 
-RUN conda create -n minimal -y && bash -c 'source activate minimal && conda install -y ipykernel && ipython kernel install --name=minimal --display-name="Python 3 (minimal conda)" && conda clean  --all -f -y && conda deactivate'
-
 
 RUN jupyter serverextension enable --py jupyter_server_proxy jupyterlab_iframe && \
     jupyter labextension install \
@@ -51,7 +49,7 @@ RUN jupyter serverextension enable --py jupyter_server_proxy jupyterlab_iframe &
     jupyter nbextension enable --py nbresuse --sys-prefix && \
     jupyter lab build
 
-FROM jupyter/datascience-notebook:python-3.8.8 
+FROM jupyter/base-notebook:python-3.8.8 
 
 USER root
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -65,19 +63,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         pkg-config \
         software-properties-common \
         unzip \
-	python3 \
-    	python3-dev \
-    	python3-venv \
-    	python3-pip \
-    	python3-wheel \
-    	python3-ipykernel \
     	openssh-client \
     	nano \
     	htop \
     	less \
     	net-tools \
     	man-db \
-    	iputils-ping \ 
+    	iputils-ping \
+        gfortran\ 
     	tmux \
     	graphviz \
     	vim &&\
@@ -106,7 +99,6 @@ RUN groupadd -g "$APP_GID" notebook && \
 COPY start-*.sh /usr/local/bin/
 COPY mem_parser.py /usr/local/bin/
 COPY --chown=notebook:notebook --from=miniconda $CONDA_DIR $CONDA_DIR
-COPY --chown=notebook:notebook --from=miniconda /usr/local/share/jupyter/kernels/minimal /usr/local/share/jupyter/kernels/minimal
 RUN mkdir -p "$CONDA_DIR/.condatmp" && chmod go+rwx "$CONDA_DIR/.condatmp"
 
 
