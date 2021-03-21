@@ -89,7 +89,6 @@ ENV TZ="Europe/Oslo" \
 	PKG_R_VERSION=4.0.3 \
 	PKG_VS_CODE_VERSION=2.1692-vsc1.39.2  \
 	HOME=/home/notebook \
-    	PATH=$PATH:$SPARK_HOME/bin \
     	XDG_CACHE_HOME=/home/notebook/.cache/
 
 RUN groupadd -g "$APP_GID" notebook && \
