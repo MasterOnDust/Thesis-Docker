@@ -116,9 +116,8 @@ COPY --chown=notebook:notebook .jupyter/ /etc/default/jupyter
 RUN chmod go+w -R "$HOME"
 
 
-RUN fix-permissions $CONDA_DIR
-
-RUN chmod go+rwx /usr/local/bin/start-notebook.sh
+RUN fix-permissions $CONDA_DIR && \
+    chmod go+rwx /usr/local/bin/start-notebook.sh
 
 USER notebook
 RUN conda init bash
