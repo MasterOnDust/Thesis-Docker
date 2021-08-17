@@ -1,3 +1,6 @@
 # Thesis-Docker
-Docker image for my thesis work on NIRD Toolkit
-[![Docker Repository on Quay](https://quay.io/repository/ovewh/xpython_thesis/status "Docker Repository on Quay")](https://quay.io/repository/ovewh/xpython_thesis)
+[![Docker](https://img.shields.io/badge/Docker-passing-brightgreen)](https://hub.docker.com/repository/docker/ovewh/thesisdocker)
+
+Docker image for my thesis work on NIRD Toolkit.
+
+
