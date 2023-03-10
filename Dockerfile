@@ -1,6 +1,6 @@
 # Basic MetOs container 
 
-FROM jupyter/base-notebook:python-3.8.8 as miniconda
+FROM jupyter/base-notebook:python-3.10.9 as miniconda
 USER root
 ENV DEBIAN_FRONTEND noninteractive \
     NODE_OPTIONS --max-old-space-size=4096 \
@@ -10,9 +10,7 @@ ENV DEBIAN_FRONTEND noninteractive \
 RUN apt update && apt install -y eatmydata apt-utils 
 RUN conda config --set channel_priority strict && \
     eatmydata conda install --quiet --update-all --yes -c conda-forge \
-    'xeus-python=0.11.3'\
-    'nbconvert=6.0.7' \
-    'fortran_kernel=0.1.7'\
+    'nbconvert' \
     'tqdm' \
     'yapf' \
     'rise' \
@@ -20,14 +18,13 @@ RUN conda config --set channel_priority strict && \
     'jupyterlab==3.*' \
     'ipywidgets' \
     'nodejs'\
-    'dask-labextension=5.0.1' \
+    'dask-labextension' \
     'tornado' \
-    'python-graphviz=0.16' \
-    'nb_conda_kernels=2.3.1'\
-    'jupyter-server-proxy=1.6' \
-    'plotly=4.14.*'\
-    'matplotlib=3.3.*' \ 
-    'jupyterlab_iframe=0.3.0'\
+    'python-graphviz' \
+    'nb_conda_kernels'\
+    'jupyter-server-proxy' \
+    'matplotlib' \ 
+    'jupyterlab_iframe'\
     'numpy' \
     'git'  && \
      conda clean  --all -f -y
