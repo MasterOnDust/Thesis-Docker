@@ -47,41 +47,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	ca-certificates \
     sudo \
     inkscape \
-    fortran \
+    gfortran \
     "openmpi-bin" && \
     apt-get -y autoremove && \
     apt-get -y clean && \
     rm -rf /var/lib/apt/lists/* && \
     ln -sf /usr/share/zoneinfo/Europe/Oslo /etc/localtime
 ENV TZ="Europe/Oslo"
-
-RUN apt update && apt install -y eatmydata apt-utils 
-RUN conda config --set channel_priority strict && \
-    eatmydata conda install --quiet --update-all --yes -c conda-forge \
-    'nbconvert' \
-    'tqdm' \
-    'yapf' \
-    'rise' \
-    'nbdime' \
-    'jupyterlab==3.*' \
-    'ipywidgets' \
-    'nodejs'\
-    'dask-labextension' \
-    'tornado' \
-    'python-graphviz' \
-    'nb_conda_kernels'\
-    'jupyter-server-proxy' \
-    'matplotlib' \ 
-    'jupyterlab_iframe'\
-    'numpy' \
-    'git'  && \
-     conda clean  --all -f -y
-
-
-
-RUN groupadd -g "$APP_GID" notebook && \
-	useradd -m -s /bin/bash -N -u "$APP_UID" -g notebook notebook && \
-	usermod -G users notebook
 
 COPY start-*.sh /usr/local/bin/
 COPY mem_parser.py /usr/local/bin/
@@ -93,7 +65,6 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --version=4.16.1
 
 ADD env.yml env.yml
 RUN mamba env create -f env.yml &&  mamba clean -yt --all
-
 
 RUN chown notebook:notebook $CONDA_DIR "$CONDA_DIR/.condatmp"
 COPY --chown=notebook:notebook .jupyter/ $HOME/.jupyter/
