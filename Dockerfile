@@ -2,14 +2,25 @@
 
 FROM jupyter/base-notebook:4c0c0aa1715f as miniconda
 
-RUN mamba config --set channel_priority strict && \
-    mamba install --quiet --yes --update-all -c conda-forge \
-    'ipyparallel==6.3.0' \
+USER root
+ENV DEBIAN_FRONTEND noninteractive \
+    NODE_OPTIONS --max-old-space-size=4096 \
+    NB_UID=999 \
+    NB_GID=999
+
+RUN apt-get update && apt-get install -y --no-install-recommends eatmydata apt-utils && \
+    mamba config --set channel_priority strict && \
+    eatmydata mamba install --quiet --update-all --yes -c conda-forge \
+    'jupyterlab-github==4.0.0' \
     'jupyter-server-proxy==4.0.0' \
-    'escapism==1.0.1' \
-    'jupyterlab-github==4.0.0' && \
-    jupyter server extension enable jupyter_server_proxy --sys-prefix && \
-    mamba clean --all -f -y
+    'ipyparallel==6.3.0' \
+    'plotly==5.17.0' \
+    'xarray==2023.9.0' \
+    'yapf==0.40.1' \
+    && mamba clean --all -f -y
+RUN mamba create -n minimal -y && bash -c 'source activate minimal && conda install -y ipykernel && ipython kernel install --name=minimal --display-name="Python 3 (minimal conda)" && conda clean --all -f -y && conda deactivate'
+
+USER notebook
 FROM jupyter/base-notebook:4c0c0aa1715f
 
 
@@ -20,9 +31,7 @@ USER root
 ENV APP_UID=999 \
 	APP_GID=999 \
 	PKG_JUPYTER_NOTEBOOK_VERSION=7.0.5
-RUN groupadd -g "$APP_GID" notebook && \
-    useradd -m -s /bin/bash -N -u "$APP_UID" -g notebook notebook && \
-    usermod -G users notebook && chmod go+rwx -R "$CONDA_DIR/bin"
+
 COPY --chown=notebook:notebook --from=miniconda $CONDA_DIR $CONDA_DIR
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -47,17 +56,32 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	ca-certificates \
     sudo \
     inkscape \
+    python3-dev \
+    python3-venv \
+    python3-pip \
     gfortran \
+    libnetcdf-dev \
+    python3-netcdf4 \
+    netcat \
     "openmpi-bin" && \
     apt-get -y autoremove && \
     apt-get -y clean && \
     rm -rf /var/lib/apt/lists/* && \
     ln -sf /usr/share/zoneinfo/Europe/Oslo /etc/localtime
-ENV TZ="Europe/Oslo"
+ENV TZ="Europe/Oslo" \
+	NB_UID=999 \
+	NB_GID=999 \
+	PKG_HADOOP_VERSION=${HADOOP_VERSION} \
+	PKG_TOREE_VERSION=0.4.0-incubating \
+	PKG_R_VERSION=4.3.1  \
+    PKG_VS_CODE_VERSION=4.16.1 \
+	HOME=/home/notebook \
+    XDG_CACHE_HOME=/home/notebook/.cache/
 
 COPY start-*.sh /usr/local/bin/
 COPY mem_parser.py /usr/local/bin/
 COPY --chown=notebook:notebook --from=miniconda $CONDA_DIR $CONDA_DIR
+COPY --chown=notebook:notebook --from=miniconda /usr/local/share/jupyter/kernels/minimal /usr/local/share/jupyter/kernels/minimal
 RUN mkdir -p "$CONDA_DIR/.condatmp" && chmod go+rwx "$CONDA_DIR/.condatmp"
 
 
@@ -65,6 +89,8 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --version=4.16.1
 
 ADD env.yml env.yml
 RUN mamba env create -f env.yml &&  mamba clean -yt --all
+
+
 
 RUN chown notebook:notebook $CONDA_DIR "$CONDA_DIR/.condatmp"
 COPY --chown=notebook:notebook .jupyter/ $HOME/.jupyter/
