@@ -25,7 +25,8 @@ RUN mamba env create -f env.yml &&  mamba clean -yt --all
 RUN bash -c 'source activate dust && conda install -y ipykernel && ipython kernel install --name=dust --display-name="Python 3 (dust env)" && conda clean --all -f -y && conda deactivate'
 
 USER notebook
-FROM jupyter/base-notebook:4c0c0aa1715f
+
+FROM jupyter/minimal-notebook:4c0c0aa1715f
 
 
 LABEL maintainer = "ovehaugv@outlook.com"
