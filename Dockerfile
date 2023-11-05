@@ -1,6 +1,6 @@
 # Basic MetOs container 
 
-FROM jupyter/base-notebook:4c0c0aa1715f as miniconda
+FROM jupyter/minimal-notebook:4c0c0aa1715f as miniconda
 
 USER root
 ENV DEBIAN_FRONTEND noninteractive \
