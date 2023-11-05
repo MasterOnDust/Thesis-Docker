@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends eatmydata apt-u
     && mamba clean --all -f -y
 RUN mamba create -n minimal -y && bash -c 'source activate minimal && conda install -y ipykernel && ipython kernel install --name=minimal --display-name="Python 3 (minimal conda)" && conda clean --all -f -y && conda deactivate'
 
+ADD env.yml env.yml
 RUN mamba env create -f env.yml &&  mamba clean -yt --all
 RUN bash -c 'source activate dust && conda install -y ipykernel && ipython kernel install --name=dust --display-name="Python 3 (dust env)" && conda clean --all -f -y && conda deactivate'
 
