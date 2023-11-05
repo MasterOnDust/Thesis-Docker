@@ -20,6 +20,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends eatmydata apt-u
     && mamba clean --all -f -y
 RUN mamba create -n minimal -y && bash -c 'source activate minimal && conda install -y ipykernel && ipython kernel install --name=minimal --display-name="Python 3 (minimal conda)" && conda clean --all -f -y && conda deactivate'
 
+RUN mamba env create -f env.yml &&  mamba clean -yt --all
+RUN bash -c 'source activate dust && conda install -y ipykernel && ipython kernel install --name=dust --display-name="Python 3 (dust env)" && conda clean --all -f -y && conda deactivate'
+
 USER notebook
 FROM jupyter/base-notebook:4c0c0aa1715f
 
@@ -78,21 +81,22 @@ ENV TZ="Europe/Oslo" \
 	HOME=/home/notebook \
     XDG_CACHE_HOME=/home/notebook/.cache/
 
+RUN groupadd -g "$APP_GID" notebook && \
+	useradd -m -s /bin/bash -N -u "$APP_UID" -g notebook notebook && \
+	usermod -G users notebook
+
+
 COPY start-*.sh /usr/local/bin/
 COPY mem_parser.py /usr/local/bin/
 COPY --chown=notebook:notebook --from=miniconda $CONDA_DIR $CONDA_DIR
 COPY --chown=notebook:notebook --from=miniconda /usr/local/share/jupyter/kernels/minimal /usr/local/share/jupyter/kernels/minimal
+COPY --chown=notebook:notebook --from=miniconda /usr/local/share/jupyter/kernels/dust /usr/local/share/jupyter/kernels/dust
 RUN mkdir -p "$CONDA_DIR/.condatmp" && chmod go+rwx "$CONDA_DIR/.condatmp"
 
 
 RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --version=4.16.1
 
-ADD env.yml env.yml
-RUN mamba env create -f env.yml &&  mamba clean -yt --all
 
-
-
-RUN chown notebook:notebook $CONDA_DIR "$CONDA_DIR/.condatmp"
 COPY --chown=notebook:notebook .jupyter/ $HOME/.jupyter/
 COPY --chown=notebook:notebook .jupyter/ /etc/default/jupyter
 RUN chmod go+w -R "$HOME"
