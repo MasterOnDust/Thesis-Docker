@@ -63,6 +63,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     python3-venv \
     python3-pip \
+    python3-ipykernel \
+    htop \
     gfortran \
     libnetcdf-dev \
     python3-netcdf4 \
