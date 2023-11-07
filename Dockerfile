@@ -2,6 +2,8 @@
 
 FROM jupyter/minimal-notebook:4c0c0aa1715f as miniconda
 
+FROM jupyter/minimal-notebook:4c0c0aa1715f as miniconda
+
 USER root
 ENV DEBIAN_FRONTEND noninteractive \
     NODE_OPTIONS --max-old-space-size=4096 \
@@ -113,5 +115,10 @@ USER notebook
 RUN conda init bash
     
 WORKDIR $HOME
+
+RUN git clone https://github.com/MasterOnDust/AGU_JGR_CLP_SOURCE_WORKFLOW.git
+RUN git clone https://github.com/MasterOnDust/Thesis_toolbox.git --branch v0.0.1 --single-branch
+RUN git clone https://github.com/MasterOnDust/flexpart_cluster.git --branch 1.0.1 --single-branch
+RUN git clone https://github.com/MasterOnDust/DUST.git --branch 0.1.2 --single-branch
 
 CMD ["/usr/local/bin/start-notebook.sh"]
