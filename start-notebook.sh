@@ -27,19 +27,19 @@ if [ ! -d "$HOME/.jupyter/nbconfig" ]; then
 	cp -r /etc/default/jupyter/nbconfig $HOME/.jupyter/
 fi
 
-if [ ! -d "$HOME/AGU_JGR_CLP_SOURCE_WORKFLOW"]; then
+if [ ! -d "$HOME/AGU_JGR_CLP_SOURCE_WORKFLOW" ]; then
     git clone https://github.com/MasterOnDust/AGU_JGR_CLP_SOURCE_WORKFLOW.git
 fi
 
-if [ ! -d "$HOME/Thesis_toolbox"]; then
+if [ ! -d "$HOME/Thesis_toolbox" ]; then
     git clone https://github.com/MasterOnDust/Thesis_toolbox.git --branch v0.0.1 --single-branch
 fi
 
-if [ ! -d "$HOME/flexpart_cluster"]; then
+if [ ! -d "$HOME/flexpart_cluster" ]; then
     git clone https://github.com/MasterOnDust/flexpart_cluster.git --branch 1.0.1 --single-branch
 fi
 
-if [ ! -d "$HOME/DUST"]; then
+if [ ! -d "$HOME/DUST" ]; then
      git clone https://github.com/MasterOnDust/DUST.git --branch 0.1.2 --single-branch
 fi
 OLDPATH=$PATH
