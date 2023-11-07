@@ -116,12 +116,5 @@ RUN conda init bash
     
 WORKDIR $HOME
 
-RUN git clone https://github.com/MasterOnDust/AGU_JGR_CLP_SOURCE_WORKFLOW.git
-RUN git clone https://github.com/MasterOnDust/Thesis_toolbox.git --branch v0.0.1 --single-branch
-RUN git clone https://github.com/MasterOnDust/flexpart_cluster.git --branch 1.0.1 --single-branch
-RUN git clone https://github.com/MasterOnDust/DUST.git --branch 0.1.2 --single-branch
-
-COPY --chown=notebook:notebook ./DUST  $HOME/DUST
-COPY --chown=notebook:notebook ./AGU_JGR_CLP_SOURCE_WORKFLOW  $HOME/AGU_JGR_CLP_SOURCE_WORKFLOW
 
 CMD ["/usr/local/bin/start-notebook.sh"]

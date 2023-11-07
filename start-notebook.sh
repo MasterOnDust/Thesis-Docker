@@ -26,8 +26,24 @@ fi
 if [ ! -d "$HOME/.jupyter/nbconfig" ]; then
 	cp -r /etc/default/jupyter/nbconfig $HOME/.jupyter/
 fi
+
+if [ ! -d "$HOME/AGU_JGR_CLP_SOURCE_WORKFLOW"]; then
+    git clone https://github.com/MasterOnDust/AGU_JGR_CLP_SOURCE_WORKFLOW.git
+fi
+
+if [ ! -d "$HOME/Thesis_toolbox"]; then
+    git clone https://github.com/MasterOnDust/Thesis_toolbox.git --branch v0.0.1 --single-branch
+fi
+
+if [ ! -d "$HOME/flexpart_cluster"]; then
+    git clone https://github.com/MasterOnDust/flexpart_cluster.git --branch 1.0.1 --single-branch
+fi
+
+if [ ! -d "$HOME/DUST"]; then
+     git clone https://github.com/MasterOnDust/DUST.git --branch 0.1.2 --single-branch
+fi
 OLDPATH=$PATH
-PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/spark/bin"
+
 /usr/bin/python3 -m venv --system-site-packages $HOME/.jupyter/sysvenv
 source $HOME/.jupyter/sysvenv/bin/activate
 python -m IPython kernel install --user --name=sysvenv --display-name='Python 3 (no conda)'
