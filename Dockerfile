@@ -92,11 +92,12 @@ RUN groupadd -g "$APP_GID" notebook && \
 	usermod -G users notebook
 
 
-COPY start-*.sh /usr/local/bin/
+
 COPY mem_parser.py /usr/local/bin/
 COPY --chown=notebook:notebook --from=miniconda $CONDA_DIR $CONDA_DIR
 COPY --chown=notebook:notebook --from=miniconda /usr/local/share/jupyter/kernels/minimal /usr/local/share/jupyter/kernels/minimal
 COPY --chown=notebook:notebook --from=miniconda /usr/local/share/jupyter/kernels/dust /usr/local/share/jupyter/kernels/dust
+COPY start-*.sh /usr/local/bin/
 RUN mkdir -p "$CONDA_DIR/.condatmp" && chmod go+rwx "$CONDA_DIR/.condatmp"
 
 
