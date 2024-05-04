@@ -36,7 +36,7 @@ if [ ! -d "$HOME/Thesis_toolbox" ]; then
 fi
 
 if [ ! -d "$HOME/flexpart_cluster" ]; then
-    git clone https://github.com/MasterOnDust/flexpart_cluster.git --branch AGU-Haugvaldstad-et-al-2024-release --single-branch
+    git clone https://github.com/MasterOnDust/flexpart_cluster.git --branch AGU-Haugvaldstad-et-al-2024-release-final --single-branch
 fi
 
 if [ ! -d "$HOME/DUST" ]; then
