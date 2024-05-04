@@ -49,13 +49,11 @@ source $HOME/.jupyter/sysvenv/bin/activate
 python -m IPython kernel install --user --name=sysvenv --display-name='Python 3 (no conda)'
 PATH=$OLDPATH
 
-conda activate dust
-cd $HOME/DUST && pip install --no-deps -e .
-cd $HOME/Thesis_toolbox && pip install --no-deps -e .
-cd $HOME/flexpart_cluster && pip install --no-deps -e .
+cd $HOME/DUST && conda run -n dust pip install --no-deps -e .
+cd $HOME/Thesis_toolbox &&  conda run -n dust pip install --no-deps -e .
+cd $HOME/flexpart_cluster && conda run -n dust pip install --no-deps -e .
 
 cd $HOME
-conda activate base
 
 if [[ ! -z "${JUPYTER_ENABLE_LAB}" ]]; then
 	jupyter lab --config $HOME/.jupyter/notebook_config.py $* &
