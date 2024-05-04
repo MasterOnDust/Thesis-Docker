@@ -2,8 +2,6 @@
 
 FROM jupyter/minimal-notebook:4c0c0aa1715f as miniconda
 
-FROM jupyter/minimal-notebook:4c0c0aa1715f as miniconda
-
 USER root
 ENV DEBIAN_FRONTEND noninteractive \
     NODE_OPTIONS --max-old-space-size=4096 \
@@ -38,6 +36,10 @@ USER root
 ENV APP_UID=999 \
 	APP_GID=999 \
 	PKG_JUPYTER_NOTEBOOK_VERSION=7.0.5
+
+RUN groupadd -g "$APP_GID" notebook && \
+	useradd -m -s /bin/bash -N -u "$APP_UID" -g notebook notebook && \
+	usermod -G users notebook
 
 COPY --chown=notebook:notebook --from=miniconda $CONDA_DIR $CONDA_DIR
 
@@ -87,12 +89,6 @@ ENV TZ="Europe/Oslo" \
 	HOME=/home/notebook \
     XDG_CACHE_HOME=/home/notebook/.cache/
 
-RUN groupadd -g "$APP_GID" notebook && \
-	useradd -m -s /bin/bash -N -u "$APP_UID" -g notebook notebook && \
-	usermod -G users notebook
-
-
-
 COPY mem_parser.py /usr/local/bin/
 COPY --chown=notebook:notebook --from=miniconda $CONDA_DIR $CONDA_DIR
 COPY --chown=notebook:notebook --from=miniconda /usr/local/share/jupyter/kernels/minimal /usr/local/share/jupyter/kernels/minimal
@@ -107,7 +103,6 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --version=4.16.1
 COPY --chown=notebook:notebook .jupyter/ $HOME/.jupyter/
 COPY --chown=notebook:notebook .jupyter/ /etc/default/jupyter
 RUN chmod go+w -R "$HOME"
-
 
 RUN fix-permissions $CONDA_DIR && \
     chmod go+rwx /usr/local/bin/start-notebook.sh

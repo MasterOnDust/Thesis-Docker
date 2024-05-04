@@ -28,19 +28,19 @@ if [ ! -d "$HOME/.jupyter/nbconfig" ]; then
 fi
 
 if [ ! -d "$HOME/AGU_JGR_CLP_SOURCE_WORKFLOW" ]; then
-    git clone https://github.com/MasterOnDust/AGU_JGR_CLP_SOURCE_WORKFLOW.git  --branch AGU-Haugvaldstad-et-al-2023 --single-branch
+    git clone https://github.com/MasterOnDust/AGU_JGR_CLP_SOURCE_WORKFLOW.git  --branch AGU-Haugvaldstad-et-al-2024-release --single-branch
 fi
 
 if [ ! -d "$HOME/Thesis_toolbox" ]; then
-    git clone https://github.com/MasterOnDust/Thesis_toolbox.git --branch AGU-Haugvaldstad-et-al-2023 --single-branch
+    git clone https://github.com/MasterOnDust/Thesis_toolbox.git --branch AGU-Haugvaldstad-et-al-2024-release --single-branch
 fi
 
 if [ ! -d "$HOME/flexpart_cluster" ]; then
-    git clone https://github.com/MasterOnDust/flexpart_cluster.git --branch AGU-Haugvaldstad-et-al-2023 --single-branch
+    git clone https://github.com/MasterOnDust/flexpart_cluster.git --branch AGU-Haugvaldstad-et-al-2024-release --single-branch
 fi
 
 if [ ! -d "$HOME/DUST" ]; then
-     git clone https://github.com/MasterOnDust/DUST.git --branch AGU-Haugvaldstad-et-al-2023 --single-branch
+     git clone https://github.com/MasterOnDust/DUST.git --branch  AGU-Haugvaldstad-et-al-2024-release --single-branch
 fi
 OLDPATH=$PATH
 
@@ -48,6 +48,14 @@ OLDPATH=$PATH
 source $HOME/.jupyter/sysvenv/bin/activate
 python -m IPython kernel install --user --name=sysvenv --display-name='Python 3 (no conda)'
 PATH=$OLDPATH
+
+conda activate dust
+cd $HOME/DUST && pip install --no-deps -e .
+cd $HOME/Thesis_toolbox && pip install --no-deps -e .
+cd $HOME/flexpart_cluster && pip install --no-deps -e .
+
+cd $HOME
+conda activate base
 
 if [[ ! -z "${JUPYTER_ENABLE_LAB}" ]]; then
 	jupyter lab --config $HOME/.jupyter/notebook_config.py $* &
